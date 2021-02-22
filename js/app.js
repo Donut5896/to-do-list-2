@@ -15,7 +15,34 @@ const LINE_THROUGH = "lineThrough";
 let LIST = [],
  id = 0;
 
+//get item from localStorage
+let data = localStorage.getItem("TODO");
 
+//check if the data is empthy or not
+if(data){
+    LIST = JSON.parse(data);
+    //set the id to the last one in the list
+    id = LIST.length;
+    //load the lis to the user interface
+    loadList(LIST);
+}else{
+    // if the data is not empty
+    LIST = [];
+    id = 0;
+}
+
+// load items to the user's interface
+function loadList(array){
+    array.forEach(function(item){
+        addToDo(item.name, item.id, item.done, item.trash);
+    })
+}
+
+//clear the local storage button
+clear.addEventListener("click", function(){
+    localStorage.clear();
+    location.reload();
+})
 
 
 //show today date
@@ -37,7 +64,7 @@ function addToDo(toDo, id, done, trash){
     const item = `<li class="item">
                     <i class="fa ${DONE} co" job="complete" id="${id}"></i>
                     <p class="text ${LINE}">${toDo}</p>
-                    <i class="fa fa-trash-o de" id="${id}"></i>
+                    <i class="fa fa-trash-o de" job="delete" id="${id}"></i>
                     </li>`;
 
     const position = "beforeend";
@@ -46,12 +73,12 @@ function addToDo(toDo, id, done, trash){
 
 //add an item to the list user by the enter key
 document.addEventListener("keyup", function(event){
-    if(event.keycode == 13){
+    if(event.key == 'Enter'){
         const toDo = input.value;
 
         //if the input isn't empthy
         if(toDo){
-            addToDo(toDo);
+            addToDo(toDo, id, false, false);
             //push items to the list aray
             LIST.push({
                 name: toDo,
@@ -59,6 +86,8 @@ document.addEventListener("keyup", function(event){
                 done: false,
                 trash: false
             });
+            //add item to localstorage
+            localStorage.setItem("TODO", JSON.stringify(LIST));
             id++;
         }
         input.value = "";
@@ -72,13 +101,14 @@ function completeToDo(element){
     element.parentNode.querySelector(".text").classList.toggle(LINE_THROUGH);
     //update the lists
     LIST[element.id].done = LIST[element.id].done ? false : true;
+    
 }
 
 //remove to do
 function removeToDo(element){
     element.parentNode.parentNode.removeChild(element.parentNode);
 //update the list
-LIST[element.id].trash = true;
+    LIST[element.id].trash = true;
 }
 
 //target the item created daynamically
@@ -91,4 +121,6 @@ list.addEventListener("click", function(event){
     }else if(elementJob == "delete"){
         removeToDo(element)
     }
+    //add item to localstorage
+    localStorage.setItem("TODO", JSON.stringify(LIST));
 })
